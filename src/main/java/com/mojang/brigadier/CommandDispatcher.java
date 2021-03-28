@@ -315,6 +315,10 @@ public class CommandDispatcher<S> {
         return parse(new StringReader(command), source);
     }
 
+    public ParseResults<S> parse(final String command, final S source, final boolean forSuggestions) {
+        return parse(new StringReader(command), source, forSuggestions);
+    }
+
     /**
      * Parses a given command.
      *
