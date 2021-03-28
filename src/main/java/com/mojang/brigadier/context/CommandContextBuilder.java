@@ -18,6 +18,7 @@ public class CommandContextBuilder<S> {
     private final CommandNode<S> rootNode;
     private final List<ParsedCommandNode<S>> nodes = new ArrayList<>();
     private final CommandDispatcher<S> dispatcher;
+    private final boolean forSuggestions;
     private S source;
     private Command<S> command;
     private CommandContextBuilder<S> child;
@@ -25,11 +26,16 @@ public class CommandContextBuilder<S> {
     private RedirectModifier<S> modifier = null;
     private boolean forks;
 
-    public CommandContextBuilder(final CommandDispatcher<S> dispatcher, final S source, final CommandNode<S> rootNode, final int start) {
+    public CommandContextBuilder(final CommandDispatcher<S> dispatcher, final S source, final CommandNode<S> rootNode, final int start, final boolean forSuggestions) {
         this.rootNode = rootNode;
         this.dispatcher = dispatcher;
         this.source = source;
+        this.forSuggestions = false;
         this.range = StringRange.at(start);
+    }
+
+    public CommandContextBuilder(final CommandDispatcher<S> dispatcher, final S source, final CommandNode<S> rootNode, final int start) {
+        this(dispatcher, source, rootNode, start, false);
     }
 
     public CommandContextBuilder<S> withSource(final S source) {
@@ -68,7 +74,7 @@ public class CommandContextBuilder<S> {
     }
 
     public CommandContextBuilder<S> copy() {
-        final CommandContextBuilder<S> copy = new CommandContextBuilder<>(dispatcher, source, rootNode, range.getStart());
+        final CommandContextBuilder<S> copy = new CommandContextBuilder<>(dispatcher, source, rootNode, range.getStart(), forSuggestions);
         copy.command = command;
         copy.arguments.putAll(arguments);
         copy.nodes.addAll(nodes);
@@ -113,6 +119,10 @@ public class CommandContextBuilder<S> {
 
     public StringRange getRange() {
         return range;
+    }
+
+    public boolean isForSuggestions() {
+        return forSuggestions;
     }
 
     public SuggestionContext<S> findSuggestionContext(final int cursor) {

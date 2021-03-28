@@ -343,7 +343,11 @@ public class CommandDispatcher<S> {
      * @see #execute(String, Object)
      */
     public ParseResults<S> parse(final StringReader command, final S source) {
-        final CommandContextBuilder<S> context = new CommandContextBuilder<>(this, source, root, command.getCursor());
+        return parse(command, source, false);
+    }
+
+    public ParseResults<S> parse(final StringReader command, final S source, final boolean forSuggestions) {
+        final CommandContextBuilder<S> context = new CommandContextBuilder<>(this, source, root, command.getCursor(), forSuggestions);
         return parseNodes(root, command, context);
     }
 
@@ -383,7 +387,7 @@ public class CommandDispatcher<S> {
             if (reader.canRead(child.getRedirect() == null ? 2 : 1)) {
                 reader.skip();
                 if (child.getRedirect() != null) {
-                    final CommandContextBuilder<S> childContext = new CommandContextBuilder<>(this, source, child.getRedirect(), reader.getCursor());
+                    final CommandContextBuilder<S> childContext = new CommandContextBuilder<>(this, source, child.getRedirect(), reader.getCursor(), contextSoFar.isForSuggestions());
                     final ParseResults<S> parse = parseNodes(child.getRedirect(), reader, childContext);
                     context.withChild(parse.getContext());
                     final ParseResults<S> redirect = new ParseResults<>(context, parse.getReader(), parse.getExceptions());
