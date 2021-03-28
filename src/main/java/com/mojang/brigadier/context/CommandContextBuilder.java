@@ -30,7 +30,7 @@ public class CommandContextBuilder<S> {
         this.rootNode = rootNode;
         this.dispatcher = dispatcher;
         this.source = source;
-        this.forSuggestions = false;
+        this.forSuggestions = forSuggestions;
         this.range = StringRange.at(start);
     }
 
