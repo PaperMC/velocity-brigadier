@@ -78,7 +78,7 @@ publishing {
 
 task report {
     doLast {
-        println "##teamcity[buildNumber '${project.version}']"
+        println "##vso[build.updatebuildnumber]${project.version}"
     }
 }
 

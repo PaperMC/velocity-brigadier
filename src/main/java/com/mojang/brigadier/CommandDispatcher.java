@@ -230,7 +230,6 @@ public class CommandDispatcher<S> {
                 if (child != null) {
                     forked |= context.isForked();
                     if (child.hasNodes()) {
-                        foundCommand = true;
                         final RedirectModifier<S> modifier = context.getRedirectModifier();
                         if (modifier == null) {
                             if (next == null) {
@@ -247,6 +246,8 @@ public class CommandDispatcher<S> {
                                     for (final S source : results) {
                                         next.add(child.copyFor(source));
                                     }
+                                } else {
+                                    foundCommand = true;
                                 }
                             } catch (final CommandSyntaxException ex) {
                                 consumer.onCommandComplete(context, false, 0);
