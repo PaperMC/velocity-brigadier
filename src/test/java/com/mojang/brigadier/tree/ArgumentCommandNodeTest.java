@@ -93,6 +93,7 @@ public class ArgumentCommandNodeTest extends AbstractCommandNodeTest {
         assertThat(builder.getName(), is(node.getName()));
         assertThat(builder.getType(), is(node.getType()));
         assertThat(builder.getRequirement(), is(node.getRequirement()));
+        assertThat(builder.getContextRequirement(), is(node.getContextRequirement()));
         assertThat(builder.getCommand(), is(node.getCommand()));
     }
 }
