@@ -86,6 +86,7 @@ public class ArgumentCommandNode<S, T> extends CommandNode<S> {
     public RequiredArgumentBuilder<S, T> createBuilder() {
         final RequiredArgumentBuilder<S, T> builder = RequiredArgumentBuilder.argument(name, type);
         builder.requires(getRequirement());
+        builder.requiresWithContext(getContextRequirement());
         builder.forward(getRedirect(), getRedirectModifier(), isFork());
         builder.suggests(customSuggestions);
         if (getCommand() != null) {
