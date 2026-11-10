@@ -4,21 +4,27 @@
 package com.mojang.brigadier;
 
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
-import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.builder.LiteralArgumentBuilder.literal;
@@ -38,10 +44,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandDispatcherTest {
@@ -421,6 +423,37 @@ public class CommandDispatcherTest {
         assertThat(subject.execute(parse), is(2));
         verify(command).run(argThat(hasProperty("source", is(source1))));
         verify(command).run(argThat(hasProperty("source", is(source2))));
+    }
+
+    @Test
+    public void testIncompleteRedirectShouldThrow() {
+        final LiteralCommandNode<Object> foo = subject.register(literal("foo")
+            .then(literal("bar")
+                .then(argument("value", integer()).executes(context -> IntegerArgumentType.getInteger(context, "value"))))
+            .then(literal("awa").executes(context -> 2)));
+        final LiteralCommandNode<Object> baz = subject.register(literal("baz").redirect(foo));
+        try {
+            int result = subject.execute("baz bar", source);
+            fail("Should have thrown an exception");
+        } catch (CommandSyntaxException e) {
+            assertThat(e.getType(), is(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand()));
+        }
+    }
+
+    @Test
+    public void testRedirectModifierEmptyResult() {
+        final LiteralCommandNode<Object> foo = subject.register(literal("foo")
+            .then(literal("bar")
+                .then(argument("value", integer()).executes(context -> IntegerArgumentType.getInteger(context, "value"))))
+            .then(literal("awa").executes(context -> 2)));
+        final RedirectModifier<Object> emptyModifier = context -> Collections.emptyList();
+        final LiteralCommandNode<Object> baz = subject.register(literal("baz").fork(foo, emptyModifier));
+        try {
+            int result = subject.execute("baz bar 100", source);
+            assertThat(result, is(0)); // No commands executed, so result is 0
+        } catch (CommandSyntaxException e) {
+            fail("Should not throw an exception");
+        }
     }
 
     @Test
