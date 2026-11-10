@@ -85,16 +85,12 @@ task report {
 publishing {
     repositories {
         maven {
-            credentials {
-                username System.getenv("NEXUS_USERNAME")
-                password System.getenv("NEXUS_PASSWORD")
-            }
+            credentials(PasswordCredentials)
 
-            name = 'velocity-nexus'
-            def base = 'https://repo.papermc.io/repository/maven'
-            def releasesRepoUrl = "$base-releases/"
-            def snapshotsRepoUrl = "$base-snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            def snapshot = version.endsWith('SNAPSHOT')
+            name = snapshot ? 'paperSnapshots' : 'paper'
+            def base = 'https://artifactory.papermc.io/artifactory'
+            url = snapshot ? "$base/snapshots/" : "$base/releases/"
         }
     }
 }
